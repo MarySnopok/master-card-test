@@ -1,7 +1,5 @@
 import { Record } from "./fable_modules/fable-library.4.2.1/Types.js";
 import { obj_type, int32_type, record_type, string_type } from "./fable_modules/fable-library.4.2.1/Reflection.js";
-import { int, string, object } from "./fable_modules/Thoth.Json.10.2.0/Decode.fs.js";
-import { uncurry2 } from "./fable_modules/fable-library.4.2.1/Util.js";
 import { PromiseBuilder__Delay_62FBFDE1, PromiseBuilder__Run_212F1D4B } from "./fable_modules/Fable.Promise.3.2.0/Promise.fs.js";
 import { printf, toText } from "./fable_modules/fable-library.4.2.1/String.js";
 import { promise } from "./fable_modules/Fable.Promise.3.2.0/PromiseImpl.fs.js";
@@ -18,11 +16,12 @@ import { Auto_generateBoxedEncoderCached_437914C6 } from "./fable_modules/Thoth.
 import { toString } from "./fable_modules/Thoth.Fetch.3.0.1/../Thoth.Json.10.2.0/Encode.fs.js";
 import { Auto_generateBoxedDecoderCached_Z6670B51 } from "./fable_modules/Thoth.Json.10.2.0/./Decode.fs.js";
 import { fromString } from "./fable_modules/Thoth.Fetch.3.0.1/../Thoth.Json.10.2.0/Decode.fs.js";
+import { uncurry2 } from "./fable_modules/fable-library.4.2.1/Util.js";
 import { createElement } from "react";
 import React from "react";
 import { Interop_reactApi } from "./fable_modules/Feliz.2.6.0/./Interop.fs.js";
 import { singleton as singleton_1 } from "./fable_modules/fable-library.4.2.1/AsyncBuilder.js";
-import { sleep, awaitPromise } from "./fable_modules/fable-library.4.2.1/Async.js";
+import { awaitPromise } from "./fable_modules/fable-library.4.2.1/Async.js";
 import { useFeliz_React__React_useDeferred_Static_Z241A641 } from "./fable_modules/Feliz.UseDeferred.2.0.0/UseDeferred.fs.js";
 import { defaultOf } from "./fable_modules/Feliz.2.6.0/../fable-library.4.2.1/Util.js";
 import { render } from "react-dom";
@@ -38,13 +37,6 @@ export function PokemonSpritesType_$reflection() {
     return record_type("App.PokemonSpritesType", [], PokemonSpritesType, () => [["front_default", string_type]]);
 }
 
-export function PokemonSpritesType_get_Decoder() {
-    return (path_1) => ((v) => object((get$) => {
-        let objectArg;
-        return new PokemonSpritesType((objectArg = get$.Required, objectArg.Field("front_default", string)));
-    }, path_1, v));
-}
-
 export class PokemonType extends Record {
     constructor(height, name, sprites) {
         super();
@@ -56,16 +48,6 @@ export class PokemonType extends Record {
 
 export function PokemonType_$reflection() {
     return record_type("App.PokemonType", [], PokemonType, () => [["height", int32_type], ["name", string_type], ["sprites", PokemonSpritesType_$reflection()]]);
-}
-
-export function PokemonType_get_Decoder() {
-    return (path_1) => ((v) => object((get$) => {
-        let objectArg_1, arg_5, objectArg_2;
-        let name;
-        const objectArg = get$.Required;
-        name = objectArg.Field("name", string);
-        return new PokemonType((objectArg_1 = get$.Required, objectArg_1.Field("height", uncurry2(int))), name, (arg_5 = PokemonSpritesType_get_Decoder(), (objectArg_2 = get$.Required, objectArg_2.Field("sprites", uncurry2(arg_5)))));
-    }, path_1, v));
 }
 
 export const apiUrl = "https://pokeapi.co/api/v2/pokemon/ditto";
@@ -127,14 +109,14 @@ export function HeroImg(heroImgInputProps) {
     });
 }
 
-export function PokemonComponent() {
-    const loadData2 = singleton_1.Delay(() => singleton_1.Bind(awaitPromise(getPokemonById(123)), (_arg) => {
+export function PokemonComponent(pokemonComponentInputProps) {
+    const pokemonId = pokemonComponentInputProps.pokemonId;
+    const loadData = singleton_1.Delay(() => singleton_1.Bind(awaitPromise(getPokemonById(pokemonId)), (_arg) => {
         const item = _arg;
         console.log(some(item));
         return singleton_1.Return(item);
     }));
-    const loadData = singleton_1.Delay(() => singleton_1.Bind(sleep(1000), () => singleton_1.Return("Hello!")));
-    const data = useFeliz_React__React_useDeferred_Static_Z241A641(loadData2, []);
+    const data = useFeliz_React__React_useDeferred_Static_Z241A641(loadData, []);
     console.log(some(data));
     switch (data.tag) {
         case 1:
@@ -169,7 +151,11 @@ export function Hello() {
 }
 
 export function Body() {
-    const children = ofArray([createElement(PokemonComponent, null), createElement(Hello, null)]);
+    const children = ofArray([createElement(PokemonComponent, {
+        pokemonId: 123,
+    }), createElement(PokemonComponent, {
+        pokemonId: 124,
+    }), createElement(Hello, null)]);
     return createElement("div", {
         children: Interop_reactApi.Children.toArray(Array.from(children)),
     });

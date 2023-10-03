@@ -14,34 +14,19 @@ open System
 type PokemonSpritesType = 
     { front_default: string }
 
-     static member Decoder =
-        Decode.object (fun get ->
-            { front_default = get.Required.Field "front_default" Decode.string }
-        )
-
 type PokemonType = 
     { 
       height: int
       name: string
       sprites : PokemonSpritesType 
     }
-     
-    // https://thoth-org.github.io/Thoth.Fetch/#Define-your-decoder-encoder-and-extracoder
-    static member Decoder =
-        Decode.object (fun get ->
-            { name = get.Required.Field "name" Decode.string
-              height = get.Required.Field "height" Decode.int
-              sprites = get.Required.Field "sprites" PokemonSpritesType.Decoder }
-        )
-
-
 
 let apiUrl = "https://pokeapi.co/api/v2/pokemon/ditto"
 
 let getPokemonById (id : int) : JS.Promise<PokemonType> =
     promise {
         let url = sprintf "https://pokeapi.co/api/v2/pokemon/%i" id
-        return! Fetch.get(url)//, decoder = PokemonType.Decoder)
+        return! Fetch.get(url)
     }
 
 [<ReactComponent>]
@@ -55,20 +40,15 @@ let HeroImg (imageUrl: string) =
         
 
 [<ReactComponent>]
-let PokemonComponent () =
+let PokemonComponent (pokemonId: int) =
     // https://zaid-ajaj.github.io/Feliz/#/Hooks/UseDeferred
-    let loadData2 = async {
-        let! item = getPokemonById 123 |> Async.AwaitPromise
+    let loadData = async {
+        let! item = getPokemonById pokemonId |> Async.AwaitPromise
         JS.console.log item
         return item
     }
 
-    let loadData = async {
-        do! Async.Sleep 1000
-        return "Hello!"
-    }
-
-    let data = React.useDeferred(loadData2, [| |])
+    let data = React.useDeferred(loadData, [| |])
     JS.console.log data
     match data with
     | Deferred.HasNotStartedYet -> Html.none
@@ -90,7 +70,8 @@ let Hello() =
 [<ReactComponent>]
 let Body() =
     Html.div [
-        PokemonComponent()
+        PokemonComponent(123)
+        PokemonComponent(124)
         Hello()  
     ]
 
