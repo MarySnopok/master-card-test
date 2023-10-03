@@ -70,9 +70,9 @@ let Hello() =
 [<ReactComponent>]
 let Body() =
     Html.div [
+        Hello() 
         PokemonComponent(123)
-        PokemonComponent(124)
-        Hello()  
+        PokemonComponent(124)  
     ]
 
 open Browser.Dom

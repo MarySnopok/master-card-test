@@ -151,11 +151,11 @@ export function Hello() {
 }
 
 export function Body() {
-    const children = ofArray([createElement(PokemonComponent, {
+    const children = ofArray([createElement(Hello, null), createElement(PokemonComponent, {
         pokemonId: 123,
     }), createElement(PokemonComponent, {
         pokemonId: 124,
-    }), createElement(Hello, null)]);
+    })]);
     return createElement("div", {
         children: Interop_reactApi.Children.toArray(Array.from(children)),
     });
