@@ -36,6 +36,11 @@ let getPokemonById (id : int) : JS.Promise<PokemonType> =
 let PokeImg (imageUrl: string) =
         Html.div [
             Html.img [
+                prop.style [
+                    style.width 150
+                    style.height 150
+                    style.padding 10
+                ]
                 prop.src imageUrl
                 prop.className "heroImage"
                 ]
@@ -64,9 +69,13 @@ let Hello() =
     Html.div [
         Html.h1 [    
             prop.className "title"
-            prop.text "Hello world!"
+            prop.text "Hello Poke World!"
             prop.style [
                 style.color "goldenrod"
+                style.fontSize 40
+                style.textAlign.center
+                style.marginTop 100
+                style.fontWeight.bold
                 ]
             ]
 
@@ -90,7 +99,16 @@ let renderPokemonComponents () =
 [<ReactComponent>]
 let PokemonListComponent () =
     let pokemonComponents = renderPokemonComponents()
-    Html.div pokemonComponents
+    Html.div [
+        prop.style [
+            style.display.flex
+            style.alignItems.center
+            style.justifyContent.center
+            style.marginTop 100
+        ]
+        prop.children  
+            pokemonComponents
+    ]
 
 
 [<ReactComponent>]

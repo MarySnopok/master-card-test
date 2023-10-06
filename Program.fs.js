@@ -100,6 +100,11 @@ export function getPokemonById(id) {
 export function PokeImg(pokeImgInputProps) {
     const imageUrl = pokeImgInputProps.imageUrl;
     const children = singleton(createElement("img", {
+        style: {
+            width: 150,
+            height: 150,
+            padding: 10,
+        },
         src: imageUrl,
         className: "heroImage",
     }));
@@ -142,9 +147,13 @@ export function PokemonComponent(pokemonComponentInputProps) {
 export function Hello() {
     const children = singleton(createElement("h1", {
         className: "title",
-        children: "Hello world!",
+        children: "Hello Poke World!",
         style: {
             color: "goldenrod",
+            fontSize: 40 + "px",
+            textAlign: "center",
+            marginTop: 100,
+            fontWeight: "bold",
         },
     }));
     return createElement("div", {
@@ -189,6 +198,12 @@ export function renderPokemonComponents() {
 export function PokemonListComponent() {
     const pokemonComponents = renderPokemonComponents();
     return createElement("div", {
+        style: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginTop: 100,
+        },
         children: Interop_reactApi.Children.toArray(Array.from(pokemonComponents)),
     });
 }
