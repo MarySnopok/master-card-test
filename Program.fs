@@ -2,14 +2,19 @@
 
 open Feliz
 open Feliz.UseDeferred
+
 open Fable.Core.JsInterop
-
 open Fable.Import.Browser
-
 open Fable.Core
+
+
 open Thoth.Fetch
 open Thoth.Json
 open System
+
+//open Loader
+//open Hero
+
 
 type PokemonSpritesType = 
     { front_default: string }
@@ -21,23 +26,20 @@ type PokemonType =
       sprites : PokemonSpritesType 
     }
 
-let apiUrl = "https://pokeapi.co/api/v2/pokemon/ditto"
-
 let getPokemonById (id : int) : JS.Promise<PokemonType> =
     promise {
         let url = sprintf "https://pokeapi.co/api/v2/pokemon/%i" id
         return! Fetch.get(url)
     }
-
-[<ReactComponent>]
-let HeroImg (imageUrl: string) =
-            Html.div [
-                Html.img [
-                   prop.src imageUrl
-                   prop.className "heroImage"
-                ]
-            ]
         
+[<ReactComponent>]
+let PokeImg (imageUrl: string) =
+        Html.div [
+            Html.img [
+                prop.src imageUrl
+                prop.className "heroImage"
+                ]
+        ]
 
 [<ReactComponent>]
 let PokemonComponent (pokemonId: int) =
@@ -54,7 +56,7 @@ let PokemonComponent (pokemonId: int) =
     | Deferred.HasNotStartedYet -> Html.none
     | Deferred.InProgress -> Html.i "loading"
     | Deferred.Failed error -> Html.div error.Message
-    | Deferred.Resolved content -> HeroImg content.sprites.front_default
+    | Deferred.Resolved content -> PokeImg content.sprites.front_default
 
 
 [<ReactComponent>]
@@ -63,16 +65,39 @@ let Hello() =
         Html.h1 [    
             prop.className "title"
             prop.text "Hello world!"
+            prop.style [
+                style.color "goldenrod"
+                ]
             ]
 
     ]
+
+let rec generateUniqueRandomPokemonIds (count : int) (acc : int list) =
+    let random = System.Random()
+    if count = 0 then
+        acc
+    else
+        let randomId = random.Next(1, 1011)
+        if List.contains randomId acc then
+            generateUniqueRandomPokemonIds count acc
+        else
+            generateUniqueRandomPokemonIds (count - 1) (randomId :: acc)
+
+let renderPokemonComponents () =
+    generateUniqueRandomPokemonIds 4 []
+    |> List.map (fun id -> PokemonComponent id)
+
+[<ReactComponent>]
+let PokemonListComponent () =
+    let pokemonComponents = renderPokemonComponents()
+    Html.div pokemonComponents
+
 
 [<ReactComponent>]
 let Body() =
     Html.div [
         Hello() 
-        PokemonComponent(123)
-        PokemonComponent(124)  
+        PokemonListComponent()
     ]
 
 open Browser.Dom

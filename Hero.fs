@@ -11,18 +11,19 @@ module Hero =
 
     let apiUrl = "https://source.unsplash.com/random/900×700/?forest"
 
+
+    [<ReactComponent>]
+    let Hero (apiUrl: string) =
+                Html.div [
+                    Html.img [
+                       prop.src apiUrl
+                       prop.className "heroImage"
+                    ]
+                ]
+
     let fetchData () =
         fetch apiUrl
         |> Json.Async.parseAs<ApiResponse>
-
-    [<ReactComponent>]
-    let HeroImg (imageUrl: string) =
-        Html.div [
-            Html.img [
-                prop.src imageUrl
-                prop.className "title"
-            ]
-        ]
 
     let heroComponent () =
         async {

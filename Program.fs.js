@@ -10,13 +10,13 @@ import { FSharpResult$2 } from "./fable_modules/fable-library.4.2.1/Choice.js";
 import { Helper_message, Helper_fetch, Helper_withContentTypeJson, Helper_withProperties } from "./fable_modules/Thoth.Fetch.3.0.1/./Fetch.fs.js";
 import { Types_RequestProperties } from "./fable_modules/Fable.Fetch.2.1.0/Fetch.fs.js";
 import { keyValueList } from "./fable_modules/fable-library.4.2.1/MapUtil.js";
-import { singleton, cons, ofArray, empty } from "./fable_modules/fable-library.4.2.1/List.js";
+import { map as map_1, contains, singleton, cons, ofArray, empty } from "./fable_modules/fable-library.4.2.1/List.js";
 import { some, unwrap, map, defaultArg } from "./fable_modules/fable-library.4.2.1/Option.js";
 import { Auto_generateBoxedEncoderCached_437914C6 } from "./fable_modules/Thoth.Json.10.2.0/./Encode.fs.js";
 import { toString } from "./fable_modules/Thoth.Fetch.3.0.1/../Thoth.Json.10.2.0/Encode.fs.js";
 import { Auto_generateBoxedDecoderCached_Z6670B51 } from "./fable_modules/Thoth.Json.10.2.0/./Decode.fs.js";
 import { fromString } from "./fable_modules/Thoth.Fetch.3.0.1/../Thoth.Json.10.2.0/Decode.fs.js";
-import { uncurry2 } from "./fable_modules/fable-library.4.2.1/Util.js";
+import { numberHash, uncurry2 } from "./fable_modules/fable-library.4.2.1/Util.js";
 import { createElement } from "react";
 import React from "react";
 import { Interop_reactApi } from "./fable_modules/Feliz.2.6.0/./Interop.fs.js";
@@ -24,6 +24,7 @@ import { singleton as singleton_1 } from "./fable_modules/fable-library.4.2.1/As
 import { awaitPromise } from "./fable_modules/fable-library.4.2.1/Async.js";
 import { useFeliz_React__React_useDeferred_Static_Z241A641 } from "./fable_modules/Feliz.UseDeferred.2.0.0/UseDeferred.fs.js";
 import { defaultOf } from "./fable_modules/Feliz.2.6.0/../fable-library.4.2.1/Util.js";
+import { nonSeeded } from "./fable_modules/fable-library.4.2.1/Random.js";
 import { render } from "react-dom";
 
 export class PokemonSpritesType extends Record {
@@ -49,8 +50,6 @@ export class PokemonType extends Record {
 export function PokemonType_$reflection() {
     return record_type("App.PokemonType", [], PokemonType, () => [["height", int32_type], ["name", string_type], ["sprites", PokemonSpritesType_$reflection()]]);
 }
-
-export const apiUrl = "https://pokeapi.co/api/v2/pokemon/ditto";
 
 export function getPokemonById(id) {
     return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
@@ -98,8 +97,8 @@ export function getPokemonById(id) {
     }));
 }
 
-export function HeroImg(heroImgInputProps) {
-    const imageUrl = heroImgInputProps.imageUrl;
+export function PokeImg(pokeImgInputProps) {
+    const imageUrl = pokeImgInputProps.imageUrl;
     const children = singleton(createElement("img", {
         src: imageUrl,
         className: "heroImage",
@@ -131,7 +130,7 @@ export function PokemonComponent(pokemonComponentInputProps) {
         }
         case 2: {
             const content = data.fields[0];
-            return createElement(HeroImg, {
+            return createElement(PokeImg, {
                 imageUrl: content.sprites.front_default,
             });
         }
@@ -144,18 +143,58 @@ export function Hello() {
     const children = singleton(createElement("h1", {
         className: "title",
         children: "Hello world!",
+        style: {
+            color: "goldenrod",
+        },
     }));
     return createElement("div", {
         children: Interop_reactApi.Children.toArray(Array.from(children)),
     });
 }
 
+export function generateUniqueRandomPokemonIds(count_mut, acc_mut) {
+    generateUniqueRandomPokemonIds:
+    while (true) {
+        const count = count_mut, acc = acc_mut;
+        const random = nonSeeded();
+        if (count === 0) {
+            return acc;
+        }
+        else {
+            const randomId = random.Next2(1, 1011) | 0;
+            if (contains(randomId, acc, {
+                Equals: (x, y) => (x === y),
+                GetHashCode: numberHash,
+            })) {
+                count_mut = count;
+                acc_mut = acc;
+                continue generateUniqueRandomPokemonIds;
+            }
+            else {
+                count_mut = (count - 1);
+                acc_mut = cons(randomId, acc);
+                continue generateUniqueRandomPokemonIds;
+            }
+        }
+        break;
+    }
+}
+
+export function renderPokemonComponents() {
+    return map_1((id) => createElement(PokemonComponent, {
+        pokemonId: id,
+    }), generateUniqueRandomPokemonIds(4, empty()));
+}
+
+export function PokemonListComponent() {
+    const pokemonComponents = renderPokemonComponents();
+    return createElement("div", {
+        children: Interop_reactApi.Children.toArray(Array.from(pokemonComponents)),
+    });
+}
+
 export function Body() {
-    const children = ofArray([createElement(Hello, null), createElement(PokemonComponent, {
-        pokemonId: 123,
-    }), createElement(PokemonComponent, {
-        pokemonId: 124,
-    })]);
+    const children = ofArray([createElement(Hello, null), createElement(PokemonListComponent, null)]);
     return createElement("div", {
         children: Interop_reactApi.Children.toArray(Array.from(children)),
     });
