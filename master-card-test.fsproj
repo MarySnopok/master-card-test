@@ -10,6 +10,8 @@
 	  <Compile Include="./src/MyLoader.fs" />
 	  <Compile Include="./src/Hello.fs" />
 	  <Compile Include="./src/PokemonComponent.fs" />
+	  <Compile Include="./BracketsServer.fs" />
+	  <Compile Include="./src/ChunkFetcher.fs" />
 	  <Compile Include="Program.fs" />
   </ItemGroup>
 
@@ -20,6 +22,7 @@
     <PackageReference Include="Fable.React" Version="9.3.0" />
     <PackageReference Include="Feliz" Version="2.6.0" />
     <PackageReference Include="Feliz.UseDeferred" Version="2.0.0" />
+    <PackageReference Include="Suave" Version="2.5.0" />
     <PackageReference Include="Thoth.Fetch" Version="3.0.1" />
     <PackageReference Include="Thoth.Json" Version="10.2.0" />
   </ItemGroup>
