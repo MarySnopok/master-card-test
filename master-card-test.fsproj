@@ -7,7 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Program.fs" />
+	  <Compile Include="./src/MyLoader.fs" />
+	  <Compile Include="./src/Hello.fs" />
+	  <Compile Include="./src/PokemonComponent.fs" />
+	  <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
