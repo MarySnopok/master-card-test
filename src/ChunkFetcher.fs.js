@@ -37,94 +37,97 @@ export function ChunksResponse_$reflection() {
     return record_type("ChunkFetcher.ChunksResponse", [], ChunksResponse, () => [["Chunks", list_type(string_type)]]);
 }
 
-export function isValid(exp_mut, openBrackets_mut, index_mut) {
-    let rest, rest_1, rest_2;
-    isValid:
-    while (true) {
-        const exp = exp_mut, openBrackets = openBrackets_mut, index = index_mut;
-        if (index === exp.length) {
-            return equals(openBrackets, empty());
-        }
-        else {
-            const currentChar = exp[index];
-            let matchResult, rest_3, rest_4, rest_5;
-            if (!isEmpty(openBrackets)) {
-                switch (head(openBrackets)) {
-                    case "<": {
-                        if ((rest = tail(openBrackets), currentChar === ">")) {
-                            matchResult = 2;
-                            rest_4 = tail(openBrackets);
-                        }
-                        else {
-                            matchResult = 4;
-                        }
-                        break;
-                    }
-                    case "[": {
-                        if ((rest_1 = tail(openBrackets), currentChar === "]")) {
-                            matchResult = 1;
-                            rest_3 = tail(openBrackets);
-                        }
-                        else {
-                            matchResult = 4;
-                        }
-                        break;
-                    }
-                    case "{": {
-                        if ((rest_2 = tail(openBrackets), currentChar === "}")) {
-                            matchResult = 3;
-                            rest_5 = tail(openBrackets);
-                        }
-                        else {
-                            matchResult = 4;
-                        }
-                        break;
-                    }
-                    default:
-                        matchResult = 4;
-                }
-            }
-            else if (((currentChar === "[") ? true : (currentChar === "<")) ? true : (currentChar === "{")) {
-                matchResult = 0;
+export function isValid(exp) {
+    const isValid_1 = (exp_1_mut, openBrackets_mut, index_mut) => {
+        let rest, rest_1, rest_2;
+        isValid_1:
+        while (true) {
+            const exp_1 = exp_1_mut, openBrackets = openBrackets_mut, index = index_mut;
+            if (index === exp_1.length) {
+                return equals(openBrackets, empty());
             }
             else {
-                matchResult = 4;
+                const currentChar = exp_1[index];
+                let matchResult, rest_3, rest_4, rest_5;
+                if (!isEmpty(openBrackets)) {
+                    switch (head(openBrackets)) {
+                        case "<": {
+                            if ((rest = tail(openBrackets), currentChar === ">")) {
+                                matchResult = 2;
+                                rest_4 = tail(openBrackets);
+                            }
+                            else {
+                                matchResult = 4;
+                            }
+                            break;
+                        }
+                        case "[": {
+                            if ((rest_1 = tail(openBrackets), currentChar === "]")) {
+                                matchResult = 1;
+                                rest_3 = tail(openBrackets);
+                            }
+                            else {
+                                matchResult = 4;
+                            }
+                            break;
+                        }
+                        case "{": {
+                            if ((rest_2 = tail(openBrackets), currentChar === "}")) {
+                                matchResult = 3;
+                                rest_5 = tail(openBrackets);
+                            }
+                            else {
+                                matchResult = 4;
+                            }
+                            break;
+                        }
+                        default:
+                            matchResult = 4;
+                    }
+                }
+                else if (((currentChar === "[") ? true : (currentChar === "<")) ? true : (currentChar === "{")) {
+                    matchResult = 0;
+                }
+                else {
+                    matchResult = 4;
+                }
+                switch (matchResult) {
+                    case 0: {
+                        exp_1_mut = exp_1;
+                        openBrackets_mut = singleton(currentChar);
+                        index_mut = (index + 1);
+                        continue isValid_1;
+                    }
+                    case 1: {
+                        exp_1_mut = exp_1;
+                        openBrackets_mut = rest_3;
+                        index_mut = (index + 1);
+                        continue isValid_1;
+                    }
+                    case 2: {
+                        exp_1_mut = exp_1;
+                        openBrackets_mut = rest_4;
+                        index_mut = (index + 1);
+                        continue isValid_1;
+                    }
+                    case 3: {
+                        exp_1_mut = exp_1;
+                        openBrackets_mut = rest_5;
+                        index_mut = (index + 1);
+                        continue isValid_1;
+                    }
+                    default:
+                        return false;
+                }
             }
-            switch (matchResult) {
-                case 0: {
-                    exp_mut = exp;
-                    openBrackets_mut = singleton(currentChar);
-                    index_mut = (index + 1);
-                    continue isValid;
-                }
-                case 1: {
-                    exp_mut = exp;
-                    openBrackets_mut = rest_3;
-                    index_mut = (index + 1);
-                    continue isValid;
-                }
-                case 2: {
-                    exp_mut = exp;
-                    openBrackets_mut = rest_4;
-                    index_mut = (index + 1);
-                    continue isValid;
-                }
-                case 3: {
-                    exp_mut = exp;
-                    openBrackets_mut = rest_5;
-                    index_mut = (index + 1);
-                    continue isValid;
-                }
-                default:
-                    return false;
-            }
+            break;
         }
-        break;
-    }
+    };
+    return isValid_1(exp, empty(), 0);
 }
 
-export function getChunks() {
-    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => {
+export function fetchAPI() {
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
         const url = "http://localhost:5020/api/v1/challenge";
         return PromiseBuilder__Run_212F1D4B_1(promise_1, PromiseBuilder__Delay_62FBFDE1_1(promise_1, () => {
             let data_2, caseStrategy_2, extra_2;
@@ -138,7 +141,7 @@ export function getChunks() {
                     const pr = PromiseBuilder__Run_212F1D4B_1(promise_1, PromiseBuilder__Delay_62FBFDE1_1(promise_1, () => (Helper_fetch(url, properties_3).then((_arg) => {
                         let response_1, decoder_1_1, decode;
                         const response = _arg;
-                        return ((response_1 = response, (decoder_1_1 = defaultArg(void 0, Auto_generateBoxedDecoderCached_Z6670B51(obj_type, unwrap(caseStrategy_2), unwrap(extra_2))), (decode = ((body_1) => fromString(uncurry2(decoder_1_1), body_1)), PromiseBuilder__Run_212F1D4B_1(promise_1, PromiseBuilder__Delay_62FBFDE1_1(promise_1, () => (((response_1.ok) ? PromiseBuilder__Run_212F1D4B_1(promise_1, PromiseBuilder__Delay_62FBFDE1_1(promise_1, () => (response_1.text().then((_arg_1) => {
+                        return ((response_1 = response, (decoder_1_1 = defaultArg(void 0, Auto_generateBoxedDecoderCached_Z6670B51(ChunksResponse_$reflection(), unwrap(caseStrategy_2), unwrap(extra_2))), (decode = ((body_1) => fromString(uncurry2(decoder_1_1), body_1)), PromiseBuilder__Run_212F1D4B_1(promise_1, PromiseBuilder__Delay_62FBFDE1_1(promise_1, () => (((response_1.ok) ? PromiseBuilder__Run_212F1D4B_1(promise_1, PromiseBuilder__Delay_62FBFDE1_1(promise_1, () => (response_1.text().then((_arg_1) => {
                             let matchValue, msg, value_1_1;
                             const body_1_1 = _arg_1;
                             return Promise.resolve((matchValue = decode(body_1_1), (matchValue.tag === 1) ? ((msg = matchValue.fields[0], new FSharpResult$2(1, [new FetchError(1, [msg])]))) : ((value_1_1 = matchValue.fields[0], new FSharpResult$2(0, [value_1_1])))));
@@ -165,37 +168,20 @@ export function getChunks() {
                 }
                 return Promise.resolve(response_1_1);
             });
-        })).then((_arg_3) => {
-            let f2_1;
-            const response_3 = _arg_3;
-            let text;
-            throw 1;
-            console.log(some(text));
-            let chunks;
-            throw 1;
-            if (chunks.tag === 1) {
-                const error_1 = chunks.fields[0];
-                return Promise.resolve(new ChunksResponse(singleton(error_1)));
-            }
-            else {
-                const chunks_1 = chunks.fields[0];
-                const validatedChunks = filter((f2_1 = (() => {
-                    throw 1;
-                })(), (arg_4) => f2_1((openBrackets) => ((index) => isValid(arg_4, openBrackets, index)))), chunks_1.Chunks);
-                return Promise.resolve(new ChunksResponse(validatedChunks));
-            }
-        });
-    }).catch((_arg_4) => {
-        const ex = _arg_4;
-        return Promise.resolve(new ChunksResponse(singleton(ex.message)));
-    }))));
+        }));
+    }));
 }
 
 export function ChunksList() {
     let elems;
-    const loadData = singleton_1.Delay(() => singleton_1.Bind(awaitPromise(getChunks()), (_arg) => {
-        const chunks = _arg;
-        return singleton_1.Return(chunks.Chunks);
+    const loadData = singleton_1.Delay(() => singleton_1.TryWith(singleton_1.Delay(() => singleton_1.Bind(awaitPromise(fetchAPI()), (_arg) => {
+        const response = _arg;
+        console.log(some(response));
+        const validatedChunks = filter((arg_1) => !isValid(arg_1), response.Chunks);
+        return singleton_1.Return(validatedChunks);
+    })), (_arg_1) => {
+        const ex = _arg_1;
+        return singleton_1.Return(singleton(ex.message));
     }));
     const data = useFeliz_React__React_useDeferred_Static_Z241A641(loadData, []);
     switch (data.tag) {
@@ -208,11 +194,11 @@ export function ChunksList() {
             });
         }
         case 2: {
-            const chunks_1 = data.fields[0];
+            const chunks = data.fields[0];
             return createElement("div", createObj(ofArray([["className", "chunks"], (elems = toList(delay(() => map_1((chunk) => createElement("div", {
                 children: chunk,
                 className: "chunk",
-            }), chunks_1))), ["children", Interop_reactApi.Children.toArray(Array.from(elems))])])));
+            }), chunks))), ["children", Interop_reactApi.Children.toArray(Array.from(elems))])])));
         }
         default:
             return defaultOf();

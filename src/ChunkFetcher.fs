@@ -13,47 +13,42 @@ open System
 
 type ChunksResponse = { Chunks: string list }
 
-let rec isValid (exp: string) (openBrackets: char list) (index: int) =
-    if index = String.length exp then
-        openBrackets = []
-    else
-        let currentChar = exp.[index]
-        match openBrackets with
-        | [] when currentChar = '[' || currentChar = '<' || currentChar = '{' ->
-            isValid exp [currentChar] (index + 1)
-        | '['::rest when currentChar = ']' ->
-            isValid exp rest (index + 1)
-        | '<'::rest when currentChar = '>' ->
-            isValid exp rest (index + 1)
-        | '{'::rest when currentChar = '}' ->
-            isValid exp rest (index + 1)
-        | _ ->
-            false
+let isValid (exp: string) =
+    let rec isValid (exp: string) (openBrackets: char list) (index: int) =
+        if index = String.length exp then
+            openBrackets = []
+        else
+            let currentChar = exp.[index]
+            match openBrackets with
+            | [] when currentChar = '[' || currentChar = '<' || currentChar = '{' ->
+                isValid exp [currentChar] (index + 1)
+            | '['::rest when currentChar = ']' ->
+                isValid exp rest (index + 1)
+            | '<'::rest when currentChar = '>' ->
+                isValid exp rest (index + 1)
+            | '{'::rest when currentChar = '}' ->
+                isValid exp rest (index + 1)
+            | _ ->
+                false
+    isValid exp [] 0
 
-let getChunks () : JS.Promise<ChunksResponse> =
+
+let fetchAPI () : JS.Promise<ChunksResponse> =
     promise {
-        try
-            let url = "http://localhost:5020/api/v1/challenge"
-            let! response = Fetch.get(url)
-            let text = response.body
-            JS.console.log text
-            let chunks = JS.parse<Result<ChunkDto, string>> text
-            match chunks with
-            | Ok chunks ->
-                let validatedChunks = chunks.Chunks |> List.filter (isValid >> not)
-                return { Chunks = validatedChunks }
-            | Error error ->
-                return { Chunks = [error] }
-        with ex ->
-            return { Chunks = [ex.Message] }
+        let url = "http://localhost:5020/api/v1/challenge"
+        return! Fetch.get(url)
     }
-
 
 [<ReactComponent>]
 let ChunksList () =
     let loadData = async {
-        let! chunks = getChunks() |> Async.AwaitPromise
-        return chunks.Chunks
+        try
+            let! response = fetchAPI() |> Async.AwaitPromise
+            JS.console.log response
+            let validatedChunks = response.Chunks |> List.filter (isValid >> not)
+            return validatedChunks
+        with ex ->
+            return [ex.Message]
     }
 
     let data = React.useDeferred(loadData, [| |])
