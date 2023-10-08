@@ -2,6 +2,8 @@ open Feliz
 open Fable.Core.JsInterop
 open Fable.Http
 
+// TODO complete a new feature - hero image at the header with a 
+// random pokemon related pictures fetched from unslapsh
 
 type ApiResponse = {
     url: string

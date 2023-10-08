@@ -1,6 +1,7 @@
 import { Record } from "../fable_modules/fable-library.4.2.1/Types.js";
 import { obj_type, record_type, list_type, string_type } from "../fable_modules/fable-library.4.2.1/Reflection.js";
-import { ofArray, empty, head, isEmpty, tail, cons, singleton } from "../fable_modules/fable-library.4.2.1/List.js";
+import { createObj, uncurry2, equals } from "../fable_modules/fable-library.4.2.1/Util.js";
+import { filter, cons, ofArray, tail, head, isEmpty, singleton, empty } from "../fable_modules/fable-library.4.2.1/List.js";
 import { PromiseBuilder__Delay_62FBFDE1, PromiseBuilder__Run_212F1D4B } from "../fable_modules/Fable.Promise.3.2.0/Promise.fs.js";
 import { promise } from "../fable_modules/Fable.Promise.3.2.0/PromiseImpl.fs.js";
 import { PromiseBuilder__Delay_62FBFDE1 as PromiseBuilder__Delay_62FBFDE1_1, PromiseBuilder__Run_212F1D4B as PromiseBuilder__Run_212F1D4B_1 } from "../fable_modules/Thoth.Fetch.3.0.1/../Fable.Promise.3.2.0/Promise.fs.js";
@@ -10,12 +11,11 @@ import { FSharpResult$2 } from "../fable_modules/fable-library.4.2.1/Choice.js";
 import { Helper_message, Helper_fetch, Helper_withContentTypeJson, Helper_withProperties } from "../fable_modules/Thoth.Fetch.3.0.1/./Fetch.fs.js";
 import { Types_RequestProperties } from "../fable_modules/Fable.Fetch.2.1.0/Fetch.fs.js";
 import { keyValueList } from "../fable_modules/fable-library.4.2.1/MapUtil.js";
-import { unwrap, map, defaultArg } from "../fable_modules/fable-library.4.2.1/Option.js";
+import { some, unwrap, map, defaultArg } from "../fable_modules/fable-library.4.2.1/Option.js";
 import { Auto_generateBoxedEncoderCached_437914C6 } from "../fable_modules/Thoth.Json.10.2.0/./Encode.fs.js";
 import { toString } from "../fable_modules/Thoth.Fetch.3.0.1/../Thoth.Json.10.2.0/Encode.fs.js";
 import { Auto_generateBoxedDecoderCached_Z6670B51 } from "../fable_modules/Thoth.Json.10.2.0/./Decode.fs.js";
 import { fromString } from "../fable_modules/Thoth.Fetch.3.0.1/../Thoth.Json.10.2.0/Decode.fs.js";
-import { createObj, uncurry2 } from "../fable_modules/fable-library.4.2.1/Util.js";
 import { createElement } from "react";
 import React from "react";
 import { singleton as singleton_1 } from "../fable_modules/fable-library.4.2.1/AsyncBuilder.js";
@@ -37,85 +37,94 @@ export function ChunksResponse_$reflection() {
     return record_type("ChunkFetcher.ChunksResponse", [], ChunksResponse, () => [["Chunks", list_type(string_type)]]);
 }
 
-export function isValidChunk(chunk) {
-    const isValidChunkInner = (stack_mut, index_mut) => {
-        isValidChunkInner:
-        while (true) {
-            const stack = stack_mut, index = index_mut;
-            const matchValue = index < chunk.length;
-            let matchResult;
-            if (isEmpty(stack)) {
-                if (matchValue) {
-                    if ((((chunk[index] === "(") ? true : (chunk[index] === "[")) ? true : (chunk[index] === "{")) ? true : (chunk[index] === "<")) {
-                        matchResult = 0;
+export function isValid(exp_mut, openBrackets_mut, index_mut) {
+    let rest, rest_1, rest_2;
+    isValid:
+    while (true) {
+        const exp = exp_mut, openBrackets = openBrackets_mut, index = index_mut;
+        if (index === exp.length) {
+            return equals(openBrackets, empty());
+        }
+        else {
+            const currentChar = exp[index];
+            let matchResult, rest_3, rest_4, rest_5;
+            if (!isEmpty(openBrackets)) {
+                switch (head(openBrackets)) {
+                    case "<": {
+                        if ((rest = tail(openBrackets), currentChar === ">")) {
+                            matchResult = 2;
+                            rest_4 = tail(openBrackets);
+                        }
+                        else {
+                            matchResult = 4;
+                        }
+                        break;
                     }
-                    else if ((((chunk[index] === ")") ? true : (chunk[index] === "]")) ? true : (chunk[index] === "}")) ? true : (chunk[index] === ">")) {
-                        matchResult = 1;
+                    case "[": {
+                        if ((rest_1 = tail(openBrackets), currentChar === "]")) {
+                            matchResult = 1;
+                            rest_3 = tail(openBrackets);
+                        }
+                        else {
+                            matchResult = 4;
+                        }
+                        break;
                     }
-                    else {
-                        matchResult = 2;
+                    case "{": {
+                        if ((rest_2 = tail(openBrackets), currentChar === "}")) {
+                            matchResult = 3;
+                            rest_5 = tail(openBrackets);
+                        }
+                        else {
+                            matchResult = 4;
+                        }
+                        break;
                     }
-                }
-                else {
-                    matchResult = 5;
+                    default:
+                        matchResult = 4;
                 }
             }
-            else if (matchValue) {
-                if ((((chunk[index] === "(") ? true : (chunk[index] === "[")) ? true : (chunk[index] === "{")) ? true : (chunk[index] === "<")) {
-                    matchResult = 3;
-                }
-                else if (((((chunk[index] === ")") && (head(stack) === (() => {
-                    throw 1;
-                })())) ? true : ((chunk[index] === "]") && (head(stack) === (() => {
-                    throw 1;
-                })()))) ? true : ((chunk[index] === "}") && (head(stack) === (() => {
-                    throw 1;
-                })()))) ? true : ((chunk[index] === ">") && (head(stack) === (() => {
-                    throw 1;
-                })()))) {
-                    matchResult = 4;
-                }
-                else {
-                    matchResult = 5;
-                }
+            else if (((currentChar === "[") ? true : (currentChar === "<")) ? true : (currentChar === "{")) {
+                matchResult = 0;
             }
             else {
-                matchResult = 5;
+                matchResult = 4;
             }
             switch (matchResult) {
                 case 0: {
-                    stack_mut = singleton(chunk[index]);
+                    exp_mut = exp;
+                    openBrackets_mut = singleton(currentChar);
                     index_mut = (index + 1);
-                    continue isValidChunkInner;
+                    continue isValid;
                 }
-                case 1:
-                    return false;
-                case 2: {
-                    stack_mut = stack;
+                case 1: {
+                    exp_mut = exp;
+                    openBrackets_mut = rest_3;
                     index_mut = (index + 1);
-                    continue isValidChunkInner;
+                    continue isValid;
+                }
+                case 2: {
+                    exp_mut = exp;
+                    openBrackets_mut = rest_4;
+                    index_mut = (index + 1);
+                    continue isValid;
                 }
                 case 3: {
-                    stack_mut = cons(chunk[index], stack);
+                    exp_mut = exp;
+                    openBrackets_mut = rest_5;
                     index_mut = (index + 1);
-                    continue isValidChunkInner;
-                }
-                case 4: {
-                    stack_mut = tail(stack);
-                    index_mut = (index + 1);
-                    continue isValidChunkInner;
+                    continue isValid;
                 }
                 default:
                     return false;
             }
-            break;
         }
-    };
-    return isValidChunkInner(empty(), 0);
+        break;
+    }
 }
 
 export function getChunks() {
-    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => {
+    return PromiseBuilder__Run_212F1D4B(promise, PromiseBuilder__Delay_62FBFDE1(promise, () => (PromiseBuilder__Delay_62FBFDE1(promise, () => {
         const url = "http://localhost:5020/api/v1/challenge";
         return PromiseBuilder__Run_212F1D4B_1(promise_1, PromiseBuilder__Delay_62FBFDE1_1(promise_1, () => {
             let data_2, caseStrategy_2, extra_2;
@@ -157,19 +166,36 @@ export function getChunks() {
                 return Promise.resolve(response_1_1);
             });
         })).then((_arg_3) => {
+            let f2_1;
             const response_3 = _arg_3;
-            return Promise.resolve((() => {
-                throw 1;
-            })());
+            let text;
+            throw 1;
+            console.log(some(text));
+            let chunks;
+            throw 1;
+            if (chunks.tag === 1) {
+                const error_1 = chunks.fields[0];
+                return Promise.resolve(new ChunksResponse(singleton(error_1)));
+            }
+            else {
+                const chunks_1 = chunks.fields[0];
+                const validatedChunks = filter((f2_1 = (() => {
+                    throw 1;
+                })(), (arg_4) => f2_1((openBrackets) => ((index) => isValid(arg_4, openBrackets, index)))), chunks_1.Chunks);
+                return Promise.resolve(new ChunksResponse(validatedChunks));
+            }
         });
-    }));
+    }).catch((_arg_4) => {
+        const ex = _arg_4;
+        return Promise.resolve(new ChunksResponse(singleton(ex.message)));
+    }))));
 }
 
 export function ChunksList() {
     let elems;
     const loadData = singleton_1.Delay(() => singleton_1.Bind(awaitPromise(getChunks()), (_arg) => {
-        const result = _arg;
-        throw 1;
+        const chunks = _arg;
+        return singleton_1.Return(chunks.Chunks);
     }));
     const data = useFeliz_React__React_useDeferred_Static_Z241A641(loadData, []);
     switch (data.tag) {
@@ -181,19 +207,13 @@ export function ChunksList() {
                 children: [error.message],
             });
         }
-        case 2:
-            if (data.fields[0].tag === 1) {
-                const errorMessage = data.fields[0].fields[0];
-                return createElement("div", createObj(ofArray([["className", "error-message"], (() => {
-                    throw 1;
-                })()])));
-            }
-            else {
-                const chunks = data.fields[0].fields[0];
-                return createElement("div", createObj(ofArray([["className", "chunks"], (elems = toList(delay(() => map_1((chunk) => createElement("div", createObj(ofArray([(() => {
-                    throw 1;
-                })(), ["className", "chunk"]]))), chunks))), ["children", Interop_reactApi.Children.toArray(Array.from(elems))])])));
-            }
+        case 2: {
+            const chunks_1 = data.fields[0];
+            return createElement("div", createObj(ofArray([["className", "chunks"], (elems = toList(delay(() => map_1((chunk) => createElement("div", {
+                children: chunk,
+                className: "chunk",
+            }), chunks_1))), ["children", Interop_reactApi.Children.toArray(Array.from(elems))])])));
+        }
         default:
             return defaultOf();
     }

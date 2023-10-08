@@ -10,7 +10,6 @@
 	  <Compile Include="./src/MyLoader.fs" />
 	  <Compile Include="./src/Hello.fs" />
 	  <Compile Include="./src/PokemonComponent.fs" />
-	  <Compile Include="./BracketsServer.fs" />
 	  <Compile Include="./src/ChunkFetcher.fs" />
 	  <Compile Include="Program.fs" />
   </ItemGroup>

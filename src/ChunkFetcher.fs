@@ -11,42 +11,49 @@ open Thoth.Fetch
 open Thoth.Json
 open System
 
-type ChunksResponse = { Chunks : string list }
+type ChunksResponse = { Chunks: string list }
 
-
-
-let isValidChunk (chunk : string) : bool =
-    let rec isValidChunkInner (stack : char list) (index : int) : bool =
-        match (stack, index < String.length chunk) with
-        | ([], true) when chunk.[index] = '(' || chunk.[index] = '[' || chunk.[index] = '{' || chunk.[index] = '<' -> isValidChunkInner [chunk.[index]] (index + 1)
-        | ([], true) when chunk.[index] = ')' || chunk.[index] = ']' || chunk.[index] = '}' || chunk.[index] = '>' -> false
-        | ([], true) -> isValidChunkInner stack (index + 1)
-        | (_, true) when chunk.[index] = '(' || chunk.[index] = '[' || chunk.[index] = '{' || chunk.[index] = '<' -> isValidChunkInner (chunk.[index] :: stack) (index + 1)
-        | (_, true) when (chunk.[index] = ')' && List.head stack = Some '(') ||
-                         (chunk.[index] = ']' && List.head stack = Some '[') ||
-                         (chunk.[index] = '}' && List.head stack = Some '{') ||
-                         (chunk.[index] = '>' && List.head stack = Some '<') ->
-                          isValidChunkInner (List.tail stack) (index + 1)
-        | _ -> false
-    isValidChunkInner [] 0
-
+let rec isValid (exp: string) (openBrackets: char list) (index: int) =
+    if index = String.length exp then
+        openBrackets = []
+    else
+        let currentChar = exp.[index]
+        match openBrackets with
+        | [] when currentChar = '[' || currentChar = '<' || currentChar = '{' ->
+            isValid exp [currentChar] (index + 1)
+        | '['::rest when currentChar = ']' ->
+            isValid exp rest (index + 1)
+        | '<'::rest when currentChar = '>' ->
+            isValid exp rest (index + 1)
+        | '{'::rest when currentChar = '}' ->
+            isValid exp rest (index + 1)
+        | _ ->
+            false
 
 let getChunks () : JS.Promise<ChunksResponse> =
     promise {
-        let url = "http://localhost:5020/api/v1/challenge"
-        let! response = Fetch.get(url)
-        return response.json
+        try
+            let url = "http://localhost:5020/api/v1/challenge"
+            let! response = Fetch.get(url)
+            let text = response.body
+            JS.console.log text
+            let chunks = JS.parse<Result<ChunkDto, string>> text
+            match chunks with
+            | Ok chunks ->
+                let validatedChunks = chunks.Chunks |> List.filter (isValid >> not)
+                return { Chunks = validatedChunks }
+            | Error error ->
+                return { Chunks = [error] }
+        with ex ->
+            return { Chunks = [ex.Message] }
     }
+
 
 [<ReactComponent>]
 let ChunksList () =
     let loadData = async {
-        let! result = getChunks() |> Async.AwaitPromise
-        match result with
-        | Ok chunks ->
-            let validatedChunks = chunks.Chunks |> List.filter isValidChunk
-            return (Ok validatedChunks)
-        | Error error -> return (Error error)
+        let! chunks = getChunks() |> Async.AwaitPromise
+        return chunks.Chunks
     }
 
     let data = React.useDeferred(loadData, [| |])
@@ -55,21 +62,14 @@ let ChunksList () =
     | Deferred.HasNotStartedYet -> Html.none
     | Deferred.InProgress -> MyLoader.loaderElement()
     | Deferred.Failed error -> Html.div error.Message
-    | Deferred.Resolved (Ok chunks) ->
+    | Deferred.Resolved chunks ->
         Html.div [
             prop.className "chunks"
             prop.children [
                 for chunk in chunks do
                     Html.div [ 
-                        prop.children chunk
+                        prop.text chunk
                         prop.className "chunk"
                     ]
             ]
         ]
-    | Deferred.Resolved (Error errorMessage) ->
-        Html.div [
-            prop.className "error-message"
-            prop.children errorMessage
-        ]
-
-

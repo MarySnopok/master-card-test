@@ -13,7 +13,7 @@ module ChunksGenerator =
 
   let genChunk () =
     let rand = System.Random()
-
+    // pick a random chunk from 4 options C,B,P,A
     match rand.NextDouble() with
     | x when x < 0.25 -> { Bracket = C; Chunks = [] }
     | x when x < 0.50 -> { Bracket = B; Chunks = [] }
